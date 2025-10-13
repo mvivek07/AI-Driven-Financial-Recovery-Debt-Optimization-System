@@ -65,19 +65,30 @@ const Transactions = () => {
     e.preventDefault();
     if (!user) return;
 
-    const { error } = await supabase.from('transactions').insert({
+    const { data, error } = await supabase.from('transactions').insert({
       user_id: user.id,
       date: formData.date,
       description: formData.description,
       category: formData.category,
       amount: parseFloat(formData.amount),
       type: formData.type
-    });
+    }).select('*').single();
 
     if (error) {
       toast.error('Failed to add transaction');
     } else {
       toast.success('Transaction added successfully');
+      // Optimistically prepend to UI so it appears immediately
+      if (data) {
+        setTransactions((prev) => [{
+          id: data.id,
+          date: data.date,
+          description: data.description,
+          category: data.category,
+          amount: data.amount,
+          type: data.type,
+        }, ...prev]);
+      }
       setFormData({
         date: new Date().toISOString().split('T')[0],
         description: '',

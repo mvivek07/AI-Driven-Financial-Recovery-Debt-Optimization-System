@@ -227,20 +227,25 @@ def detect_anomalies(csv_path, date_col, value_col):
     summary = f"Detected {len(anomalies)} potential anomalies in '{value_col}'. These are values significantly lower than {lower_bound:.2f} or higher than {upper_bound:.2f}."
     return summary, f'/{plot_path}'
 
-
 def format_response_with_bold_tags(text):
-    """Format response text by converting markdown bold to HTML bold tags and highlighting numbers."""
+    """Format response text by converting markdown to HTML, removing ###, ***, and highlighting numbers."""
     import re
+    
+    # Remove ### headers and *** dividers
+    text = re.sub(r'###\s*', '', text)
+    text = re.sub(r'\*\*\*+', '', text)
     
     # Convert markdown bold to HTML bold
     text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
     
-    # Highlight currency amounts and percentages
-    text = re.sub(r'(₹[\d,]+\.?\d*)', r'<b>\1</b>', text)
-    text = re.sub(r'([\d,]+\.?\d*%)', r'<b>\1</b>', text)
+    # Convert markdown bullet points to hyphens
+    text = re.sub(r'^\s*[*•]\s+', '- ', text, flags=re.MULTILINE)
     
-    # Highlight standalone numbers that might be metrics
-    text = re.sub(r'\b(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)\b(?=\s*(?:rows|entries|points|days|months|years))', r'<b>\1</b>', text)
+    # Highlight all numbers (currency, percentages, regular numbers)
+    text = re.sub(r'(₹[\d,]+\.?\d*)', r'<b>\1</b>', text)
+    text = re.sub(r'(\$[\d,]+\.?\d*)', r'<b>\1</b>', text)
+    text = re.sub(r'([\d,]+\.?\d*%)', r'<b>\1</b>', text)
+    text = re.sub(r'\b(\d{1,3}(?:,\d{3})*(?:\.\d+)?)\b', r'<b>\1</b>', text)
     
     return text
 
@@ -530,50 +535,204 @@ def chat():
             if img_url: response_data['image_url'] = img_url
             final_response_text = summary
 
-        # Essential chart requests via charts.py if available
-        elif any(k in user_prompt for k in ["line chart", "bar chart", "pie chart", "area chart", "scatter plot", "box plot", "heat map", "heatmap", "waterfall chart"]):
+        # Chart requests - check if user wants explanation with chart
+        elif "pie" in user_prompt and ("chart" in user_prompt or "graph" in user_prompt or "plot" in user_prompt):
             if generate_chart is None:
                 final_response_text = "Chart generator unavailable."
             else:
-                # Map keywords to chart identifiers
-                if "line" in user_prompt: chart_kind = 'line'
-                elif "bar" in user_prompt and "stacked" not in user_prompt: chart_kind = 'bar'
-                elif "pie" in user_prompt: chart_kind = 'pie'
-                elif "area" in user_prompt: chart_kind = 'area'
-                elif "scatter" in user_prompt: chart_kind = 'scatter'
-                elif "box" in user_prompt: chart_kind = 'box'
-                elif "waterfall" in user_prompt: chart_kind = 'waterfall'
-                else: chart_kind = 'heatmap'
-                msg, img_url = generate_chart(chart_kind, csv_path, date_col, value_col)
+                msg, img_url = generate_chart('pie', csv_path, date_col, value_col)
                 if img_url: response_data['image_url'] = img_url
-                # Ask knowledge base to explain using data context if available
-                explanation = ""
-                try:
+                
+                # Check if user wants explanation
+                if any(word in user_prompt for word in ['explain', 'tell me', 'what', 'why', 'how', 'analyze', 'insight']):
+                    explanation = ""
                     if knowledge_chain and not isinstance(knowledge_chain, str):
-                        kb_query = f"Explain the insights from a {chart_kind} derived from the uploaded dataset focusing on {value_col or 'key metrics'}. Provide CFO-level guidance."
-                        kb_res = knowledge_chain.invoke({"query": kb_query})
-                        explanation = kb_res.get('result', '')
-                except Exception:
-                    pass
-                final_response_text = (msg + ("\n\n" + explanation if explanation else "")).strip()
+                        try:
+                            kb_query = f"Provide concise insights about pie chart analysis for {value_col or 'financial metrics'}. Focus on practical CFO-level interpretation. Keep under 100 words."
+                            kb_res = knowledge_chain.invoke({"query": kb_query})
+                            explanation = kb_res.get('result', '')
+                        except Exception:
+                            pass
+                    final_response_text = msg + ("\n\n" + explanation if explanation else "")
+                else:
+                    final_response_text = msg
+        
+        elif "bar" in user_prompt and ("chart" in user_prompt or "graph" in user_prompt or "plot" in user_prompt) and "stacked" not in user_prompt:
+            if generate_chart is None:
+                final_response_text = "Chart generator unavailable."
+            else:
+                msg, img_url = generate_chart('bar', csv_path, date_col, value_col)
+                if img_url: response_data['image_url'] = img_url
+                
+                # Check if user wants explanation
+                if any(word in user_prompt for word in ['explain', 'tell me', 'what', 'why', 'how', 'analyze', 'insight']):
+                    explanation = ""
+                    if knowledge_chain and not isinstance(knowledge_chain, str):
+                        try:
+                            kb_query = f"Provide concise insights about bar chart analysis for {value_col or 'financial metrics'}. Focus on practical CFO-level interpretation. Keep under 100 words."
+                            kb_res = knowledge_chain.invoke({"query": kb_query})
+                            explanation = kb_res.get('result', '')
+                        except Exception:
+                            pass
+                    final_response_text = msg + ("\n\n" + explanation if explanation else "")
+                else:
+                    final_response_text = msg
+        
+        elif "line" in user_prompt and ("chart" in user_prompt or "graph" in user_prompt or "plot" in user_prompt):
+            if generate_chart is None:
+                final_response_text = "Chart generator unavailable."
+            else:
+                msg, img_url = generate_chart('line', csv_path, date_col, value_col)
+                if img_url: response_data['image_url'] = img_url
+                
+                # Check if user wants explanation
+                if any(word in user_prompt for word in ['explain', 'tell me', 'what', 'why', 'how', 'analyze', 'insight']):
+                    explanation = ""
+                    if knowledge_chain and not isinstance(knowledge_chain, str):
+                        try:
+                            kb_query = f"Provide concise insights about line chart trend analysis for {value_col or 'financial metrics'}. Focus on practical CFO-level interpretation. Keep under 100 words."
+                            kb_res = knowledge_chain.invoke({"query": kb_query})
+                            explanation = kb_res.get('result', '')
+                        except Exception:
+                            pass
+                    final_response_text = msg + ("\n\n" + explanation if explanation else "")
+                else:
+                    final_response_text = msg
+        
+        elif "area" in user_prompt and ("chart" in user_prompt or "graph" in user_prompt or "plot" in user_prompt):
+            if generate_chart is None:
+                final_response_text = "Chart generator unavailable."
+            else:
+                msg, img_url = generate_chart('area', csv_path, date_col, value_col)
+                if img_url: response_data['image_url'] = img_url
+                
+                # Check if user wants explanation
+                if any(word in user_prompt for word in ['explain', 'tell me', 'what', 'why', 'how', 'analyze', 'insight']):
+                    explanation = ""
+                    if knowledge_chain and not isinstance(knowledge_chain, str):
+                        try:
+                            kb_query = f"Provide concise insights about area chart analysis for {value_col or 'financial metrics'}. Focus on practical CFO-level interpretation. Keep under 100 words."
+                            kb_res = knowledge_chain.invoke({"query": kb_query})
+                            explanation = kb_res.get('result', '')
+                        except Exception:
+                            pass
+                    final_response_text = msg + ("\n\n" + explanation if explanation else "")
+                else:
+                    final_response_text = msg
+        
+        elif "scatter" in user_prompt and ("chart" in user_prompt or "graph" in user_prompt or "plot" in user_prompt):
+            if generate_chart is None:
+                final_response_text = "Chart generator unavailable."
+            else:
+                msg, img_url = generate_chart('scatter', csv_path, date_col, value_col)
+                if img_url: response_data['image_url'] = img_url
+                
+                # Check if user wants explanation
+                if any(word in user_prompt for word in ['explain', 'tell me', 'what', 'why', 'how', 'analyze', 'insight']):
+                    explanation = ""
+                    if knowledge_chain and not isinstance(knowledge_chain, str):
+                        try:
+                            kb_query = f"Provide concise insights about scatter plot correlation analysis. Focus on practical CFO-level interpretation. Keep under 100 words."
+                            kb_res = knowledge_chain.invoke({"query": kb_query})
+                            explanation = kb_res.get('result', '')
+                        except Exception:
+                            pass
+                    final_response_text = msg + ("\n\n" + explanation if explanation else "")
+                else:
+                    final_response_text = msg
+        
+        elif "box" in user_prompt and ("chart" in user_prompt or "graph" in user_prompt or "plot" in user_prompt):
+            if generate_chart is None:
+                final_response_text = "Chart generator unavailable."
+            else:
+                msg, img_url = generate_chart('box', csv_path, date_col, value_col)
+                if img_url: response_data['image_url'] = img_url
+                
+                # Check if user wants explanation
+                if any(word in user_prompt for word in ['explain', 'tell me', 'what', 'why', 'how', 'analyze', 'insight']):
+                    explanation = ""
+                    if knowledge_chain and not isinstance(knowledge_chain, str):
+                        try:
+                            kb_query = f"Provide concise insights about box plot distribution analysis. Focus on practical CFO-level interpretation. Keep under 100 words."
+                            kb_res = knowledge_chain.invoke({"query": kb_query})
+                            explanation = kb_res.get('result', '')
+                        except Exception:
+                            pass
+                    final_response_text = msg + ("\n\n" + explanation if explanation else "")
+                else:
+                    final_response_text = msg
+        
+        elif ("heatmap" in user_prompt or "heat map" in user_prompt) and ("chart" in user_prompt or "graph" in user_prompt or "plot" in user_prompt or "correlation" in user_prompt):
+            if generate_chart is None:
+                final_response_text = "Chart generator unavailable."
+            else:
+                msg, img_url = generate_chart('heatmap', csv_path, date_col, value_col)
+                if img_url: response_data['image_url'] = img_url
+                
+                # Check if user wants explanation
+                if any(word in user_prompt for word in ['explain', 'tell me', 'what', 'why', 'how', 'analyze', 'insight']):
+                    explanation = ""
+                    if knowledge_chain and not isinstance(knowledge_chain, str):
+                        try:
+                            kb_query = f"Provide concise insights about correlation heatmap analysis. Focus on practical CFO-level interpretation. Keep under 100 words."
+                            kb_res = knowledge_chain.invoke({"query": kb_query})
+                            explanation = kb_res.get('result', '')
+                        except Exception:
+                            pass
+                    final_response_text = msg + ("\n\n" + explanation if explanation else "")
+                else:
+                    final_response_text = msg
+        
+        elif "waterfall" in user_prompt and ("chart" in user_prompt or "graph" in user_prompt or "plot" in user_prompt):
+            if generate_chart is None:
+                final_response_text = "Chart generator unavailable."
+            else:
+                msg, img_url = generate_chart('waterfall', csv_path, date_col, value_col)
+                if img_url: response_data['image_url'] = img_url
+                
+                # Check if user wants explanation
+                if any(word in user_prompt for word in ['explain', 'tell me', 'what', 'why', 'how', 'analyze', 'insight']):
+                    explanation = ""
+                    if knowledge_chain and not isinstance(knowledge_chain, str):
+                        try:
+                            kb_query = f"Provide concise insights about waterfall chart financial breakdown analysis. Focus on practical CFO-level interpretation. Keep under 100 words."
+                            kb_res = knowledge_chain.invoke({"query": kb_query})
+                            explanation = kb_res.get('result', '')
+                        except Exception:
+                            pass
+                    final_response_text = msg + ("\n\n" + explanation if explanation else "")
+                else:
+                    final_response_text = msg
 
-        # Forecast/graph generic requests
-        elif ("forecast" in user_prompt or "predict" in user_prompt 
-            or "graph" in user_prompt or "chart" in user_prompt or "plot" in user_prompt or "compare" in user_prompt):
+        # Forecast/predict requests
+        elif "forecast" in user_prompt or "predict" in user_prompt:
             summary, plot_url = predict_timeseries(csv_path, date_col, value_col)
             if plot_url: response_data['image_url'] = plot_url
             final_response_text = summary
+        
+        # Generic chart/graph/plot requests - default to asking user to be specific
+        elif "chart" in user_prompt or "graph" in user_prompt or "plot" in user_prompt or "compare" in user_prompt:
+            final_response_text = "I can generate various types of charts for you. Please specify which type you'd like:\n\n" + \
+                                  "- **Pie chart** - for showing proportions and percentages\n" + \
+                                  "- **Bar chart** - for comparing categories\n" + \
+                                  "- **Line chart** - for showing trends over time\n" + \
+                                  "- **Area chart** - for cumulative trends\n" + \
+                                  "- **Scatter plot** - for showing relationships\n" + \
+                                  "- **Box plot** - for distribution analysis\n" + \
+                                  "- **Heatmap** - for correlation analysis\n" + \
+                                  "- **Waterfall chart** - for financial breakdown\n\n" + \
+                                  "Or you can ask for a **forecast** to predict future trends."
             
         elif "anomaly" in user_prompt or "outlier" in user_prompt:
             summary, plot_url = detect_anomalies(csv_path, date_col, value_col)
             if plot_url: response_data['image_url'] = plot_url
             final_response_text = summary
-            
+        
         else:
-            # 2. ALWAYS ANALYZE DATASET FIRST, THEN ADD KNOWLEDGE BASE INSIGHTS
+            # ALWAYS ANALYZE DATASET FIRST, THEN ADD KNOWLEDGE BASE INSIGHTS
             print("➡️ Analyzing dataset first, then adding knowledge base insights...")
             
-            # ALWAYS get data insights first using CSV agent
+            # Get data insights first using CSV agent
             print("➡️ Analyzing dataset...")
             data_agent_prompt = f"""
             Analyze the financial dataset to answer: '{user_prompt}'
@@ -582,11 +741,12 @@ def chat():
             1. Extract relevant data points related to the user's question
             2. Calculate key metrics (totals, averages, trends, etc.)
             3. Provide specific numbers and insights from the dataset
-            4. For sales questions, include exact values and comparisons
-            5. For improvement questions, identify current performance metrics
+            4. Be concise and to-the-point - avoid long explanations
+            5. Use bullet points with hyphens (-) for listing items
             6. Your response MUST start with "Final Answer:"
             7. Be specific with numbers, dates, and amounts
             8. Always base your answer on the actual data in the CSV file
+            9. Keep response under 200 words
             
             User's question: {user_prompt}
             """
@@ -599,9 +759,8 @@ def chat():
                 agent_executor_kwargs={
                     "handle_parsing_errors": True
                 },
-                # Increase limits to reduce premature stopping on larger files/queries
-                max_iterations=20,
-                max_execution_time=90
+                max_iterations=30,
+                max_execution_time=120
             )
 
             data_insights = ""
@@ -616,42 +775,37 @@ def chat():
                 print(f"Data analysis failed: {agent_error}")
                 data_insights = f"Unable to analyze dataset: {str(agent_error)}"
             
-            # Get strategic advice from knowledge base if available
+            # Get strategic advice from knowledge base ONLY if relevant
             strategic_advice = ""
             if knowledge_chain and not isinstance(knowledge_chain, str):
-                print("➡️ Getting strategic advice from knowledge base...")
-                try:
-                    # Create enhanced query that includes data context
-                    enhanced_query = f"{user_prompt}"
-                    if data_insights:
-                        enhanced_query += f"\n\nBased on this data context: {data_insights[:500]}..."
-                    
-                    strategy_result = knowledge_chain.invoke({"query": enhanced_query})
-                    strategic_advice = strategy_result['result']
-                except Exception as e:
-                    print(f"Knowledge base query failed: {e}")
-                    strategic_advice = "Unable to retrieve strategic advice from knowledge base."
-            else:
-                print("➡️ Knowledge base not available, skipping strategic advice...")
-                strategic_advice = "Knowledge base unavailable - strategic advice not available."
+                # Only query knowledge base for strategic/improvement questions
+                strategic_keywords = ['improve', 'strategy', 'recommendation', 'advice', 'how to', 'what should', 'best practice', 'optimize', 'increase', 'decrease', 'reduce', 'grow', 'turnaround']
+                if any(keyword in user_prompt for keyword in strategic_keywords):
+                    print("➡️ Getting strategic advice from knowledge base...")
+                    try:
+                        kb_prompt = f"""
+                        Based on the user's question: '{user_prompt}'
+                        And the data context: {data_insights[:300] if data_insights else 'N/A'}
+                        
+                        Provide concise, actionable CFO-level recommendations.
+                        - Keep response under 150 words
+                        - Use bullet points with hyphens (-)
+                        - Focus on practical actions
+                        - Avoid generic advice
+                        """
+                        strategy_result = knowledge_chain.invoke({"query": kb_prompt})
+                        strategic_advice = strategy_result['result']
+                    except Exception as e:
+                        print(f"Knowledge base query failed: {e}")
+                        strategic_advice = ""
             
-            # ALWAYS combine insights into comprehensive response
+            # Combine insights concisely
             if data_insights and strategic_advice:
-                final_response_text = f"""<b>📊 Data Analysis:</b>
-{data_insights}
-
-<b>💡 Strategic Recommendations:</b>
-{strategic_advice}
-
-<b>🎯 Action Plan:</b>
-Based on your data showing {data_insights[:200]}..., I recommend focusing on the strategic insights above to drive improvement."""
-            
+                final_response_text = f"{data_insights}\n\n<b>Recommendations:</b>\n{strategic_advice}"
             elif data_insights:
-                final_response_text = f"<b>📊 Analysis Results:</b>\n{data_insights}"
-            
+                final_response_text = data_insights
             elif strategic_advice:
-                final_response_text = f"<b>💡 Strategic Advice:</b>\n{strategic_advice}"
-            
+                final_response_text = strategic_advice
             else:
                 final_response_text = "I need more context to provide a helpful analysis. Could you please be more specific about what you'd like to know?"
 

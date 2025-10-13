@@ -12,8 +12,11 @@ export function Layout({ children }: LayoutProps) {
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <main className="flex-1 flex flex-col">
-          <header className="h-14 flex items-center border-b px-4 bg-background">
-            <SidebarTrigger />
+          <header className="h-14 flex items-center justify-between border-b px-4 bg-background">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger />
+              <img src="/logo.svg" alt="Company Logo" className="h-7 w-7" />
+            </div>
           </header>
           <div className="flex-1 overflow-auto">
             {children}

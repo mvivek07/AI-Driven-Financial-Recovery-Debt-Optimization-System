@@ -5,8 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Briefcase, Send, Upload, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+interface Message {
+  role: string;
+  content: string;
+  image_url?: string;
+  secondary_image_url?: string;
+}
+
 const VCFO = () => {
-  const [messages, setMessages] = useState<Array<{role: string, content: string}>>([]);
+  const [messages, setMessages] = useState<Array<Message>>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -93,10 +100,20 @@ const VCFO = () => {
       } else {
         // Remove HTML tags for display
         const cleanContent = data.response.replace(/<[^>]*>/g, '');
-        setMessages(prev => [...prev, { 
+        const newMessage: Message = { 
           role: "assistant", 
-          content: cleanContent 
-        }]);
+          content: cleanContent
+        };
+        
+        // Add image URLs if present
+        if (data.image_url) {
+          newMessage.image_url = `${FLASK_API_URL}${data.image_url}`;
+        }
+        if (data.secondary_image_url) {
+          newMessage.secondary_image_url = `${FLASK_API_URL}${data.secondary_image_url}`;
+        }
+        
+        setMessages(prev => [...prev, newMessage]);
       }
     } catch (error) {
       console.error("Chat error:", error);
@@ -190,6 +207,32 @@ const VCFO = () => {
                     }`}
                   >
                     <p className="whitespace-pre-wrap text-sm">{msg.content}</p>
+                    {msg.image_url && (
+                      <div className="mt-3">
+                        <img 
+                          src={msg.image_url} 
+                          alt="Generated chart" 
+                          className="w-full rounded-lg border border-border"
+                          onError={(e) => {
+                            console.error('Image load error:', msg.image_url);
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
+                    {msg.secondary_image_url && (
+                      <div className="mt-3">
+                        <img 
+                          src={msg.secondary_image_url} 
+                          alt="Secondary chart" 
+                          className="w-full rounded-lg border border-border"
+                          onError={(e) => {
+                            console.error('Secondary image load error:', msg.secondary_image_url);
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               ))

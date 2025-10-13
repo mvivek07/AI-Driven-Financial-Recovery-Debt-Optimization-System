@@ -330,11 +330,17 @@
                     loadingDiv.innerHTML = `<div class="error-message"><strong>Error:</strong> ${data.error}</div>`;
                 } else {
                     let botResponseHTML = `<div class="response-content">${data.response.replace(/\n/g, '<br>')}</div>`;
-                    if (data.image_url) {
-                        botResponseHTML += `<div class="plot-container"><img src="${data.image_url}?t=${new Date().getTime()}" alt="Generated Analysis" class="plot-image"></div>`;
+                    // Prefer image_url; gracefully fallback to embedded base64 if the URL fails or is missing
+                    if (data.image_url || data.image_data_url) {
+                        const primarySrc = data.image_url ? `${data.image_url}?t=${Date.now()}` : (data.image_data_url || '');
+                        const onErr = data.image_data_url ? `onerror="this.onerror=null; this.src='${data.image_data_url}'"` : '';
+                        botResponseHTML += `<div class="plot-container"><img src="${primarySrc}" ${onErr} alt="Generated Analysis" class="plot-image"></div>`;
+                        if (data.image_url) {
+                            botResponseHTML += `<div style="margin-top:6px"><a href="${data.image_url}" target="_blank" rel="noopener" style="color:#38bdf8;text-decoration:underline">Open chart in new tab</a></div>`;
+                        }
                     }
                     if (data.secondary_image_url) {
-                        botResponseHTML += `<div class="plot-container"><img src="${data.secondary_image_url}?t=${new Date().getTime()}" alt="Secondary Plot" class="plot-image"></div>`;
+                        botResponseHTML += `<div class="plot-container"><img src="${data.secondary_image_url}?t=${Date.now()}" alt="Secondary Plot" class="plot-image"></div>`;
                     }
                     loadingDiv.innerHTML = botResponseHTML;
                 }

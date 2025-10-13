@@ -12,9 +12,7 @@ const Index = () => {
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-              <BarChart3 className="text-primary-foreground" size={24} />
-            </div>
+            <img src="/logo.svg" alt="RelentlessAI Logo" className="w-10 h-10" />
             <div>
               <h1 className="text-xl font-bold text-foreground">RelentlessAI</h1>
               <p className="text-xs text-muted-foreground">SME Financial Platform</p>
@@ -44,6 +42,8 @@ const Index = () => {
           Start Free Trial
         </Button>
       </section>
+
+
 
       {/* Services Section */}
       <section className="container mx-auto px-4 py-16">

@@ -67,7 +67,7 @@ const Invoices = () => {
     e.preventDefault();
     if (!user) return;
 
-    const { error } = await supabase.from('invoices').insert({
+    const { data, error } = await supabase.from('invoices').insert({
       user_id: user.id,
       invoice_number: formData.invoice_number,
       client_name: formData.client_name,
@@ -75,12 +75,23 @@ const Invoices = () => {
       due_date: formData.due_date,
       amount: parseFloat(formData.amount),
       status: formData.status
-    });
+    }).select('*').single();
 
     if (error) {
       toast.error('Failed to add invoice');
     } else {
       toast.success('Invoice added successfully');
+      if (data) {
+        setInvoices((prev) => [{
+          id: data.id,
+          invoice_number: data.invoice_number,
+          client_name: data.client_name,
+          date: data.date,
+          due_date: data.due_date,
+          amount: data.amount,
+          status: data.status,
+        }, ...prev]);
+      }
       setFormData({
         invoice_number: '',
         client_name: '',

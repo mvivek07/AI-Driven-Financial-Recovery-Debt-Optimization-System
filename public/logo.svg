@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <rect width="512" height="512" fill="white"/>
+  <g transform="translate(256,256)">
+    <circle r="48" fill="black"/>
+    <!-- 8 petals -->
+    <g fill="black">
+      <path d="M0 -190 C 36 -150 36 -110 0 -80 C -8 -110 -8 -150 0 -190 Z"/>
+      <path d="M135 -135 C 95 -120 75 -90 85 -55 C 110 -70 130 -100 135 -135 Z" transform="rotate(45)"/>
+      <path d="M190 0 C 150 -36 110 -36 80 0 C 110 8 150 8 190 0 Z" transform="rotate(90)"/>
+      <path d="M135 135 C 120 95 90 75 55 85 C 70 110 100 130 135 135 Z" transform="rotate(135)"/>
+      <path d="M0 190 C 36 150 36 110 0 80 C -8 110 -8 150 0 190 Z" transform="rotate(180)"/>
+      <path d="M-135 135 C -95 120 -75 90 -85 55 C -110 70 -130 100 -135 135 Z" transform="rotate(225)"/>
+      <path d="M-190 0 C -150 36 -110 36 -80 0 C -110 -8 -150 -8 -190 0 Z" transform="rotate(270)"/>
+      <path d="M-135 -135 C -120 -95 -90 -75 -55 -85 C -70 -110 -100 -130 -135 -135 Z" transform="rotate(315)"/>
+    </g>
+  </g>
+</svg>

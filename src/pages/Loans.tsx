@@ -69,7 +69,7 @@ const Loans = () => {
     e.preventDefault();
     if (!user) return;
 
-    const { error } = await supabase.from('loans').insert({
+    const { data, error } = await supabase.from('loans').insert({
       user_id: user.id,
       loan_name: formData.loan_name,
       principal_amount: parseFloat(formData.principal_amount),
@@ -78,12 +78,24 @@ const Loans = () => {
       end_date: formData.end_date,
       monthly_payment: parseFloat(formData.monthly_payment),
       status: formData.status
-    });
+    }).select('*').single();
 
     if (error) {
       toast.error('Failed to add loan');
     } else {
       toast.success('Loan added successfully');
+      if (data) {
+        setLoans((prev) => [{
+          id: data.id,
+          loan_name: data.loan_name,
+          principal_amount: data.principal_amount,
+          interest_rate: data.interest_rate,
+          start_date: data.start_date,
+          end_date: data.end_date,
+          monthly_payment: data.monthly_payment,
+          status: data.status,
+        }, ...prev]);
+      }
       setFormData({
         loan_name: '',
         principal_amount: '',
