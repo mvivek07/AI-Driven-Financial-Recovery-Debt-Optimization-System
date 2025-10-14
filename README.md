@@ -2,7 +2,7 @@
 
   <h1>💼 AI-Driven Financial Recovery & Debt Optimization System - Project Analysis</h1>
 
-  <p>This is a comprehensive full-stack financial management and AI-powered analytics platform designed to help users manage finances, analyze data, and receive intelligent insights through an <strong>AI Virtual CFO assistant</strong>.</p>
+  <p>This is a comprehensive full-stack financial management and AI-powered analytics platform designed to help users manage finances, analyze data, and receive intelligent insights through an AI Virtual CFO assistant.</p>
 
     <h2>🏗️ Architecture Overview</h2>
 
