@@ -33,8 +33,6 @@
       <li>Database: Supabase (PostgreSQL)</li>
     </ul>
   </div>
-
-  <div class="section">
     <h2>🧩 Core Features</h2>
 
     <h3>1. User Authentication & Management</h3>
@@ -91,7 +89,6 @@
     </ul>
   </div>
 
-  <div class="section">
     <h2>⚙️ Technical Implementation</h2>
 
     <h3>Flask Backend (app.py)</h3>
@@ -120,7 +117,6 @@
     </table>
   </div>
 
-  <div class="section">
     <h2>🧠 AI/ML Technologies</h2>
     <ul>
       <li>Google Gemini Pro (LLM)</li>
@@ -154,7 +150,6 @@
     </ol>
   </div>
 
-  <div class="section">
     <h2>🔐 Security & Best Practices</h2>
     <ul>
       <li>Environment Variables for all API keys</li>
