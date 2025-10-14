@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI-Driven Financial Recovery & Debt Optimization System</title>
 </head>
 <body>
 
@@ -166,7 +165,6 @@
     </ul>
   </div>
 
-  <div class="section">
     <h2>🧑‍💻 Development Setup</h2>
     <pre><code>Frontend: npm run dev (Vite on port 8080)
 Backend: python app.py (Flask on port 5000)
