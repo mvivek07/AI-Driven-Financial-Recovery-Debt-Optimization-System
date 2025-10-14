@@ -1,10 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-</head>
-<body>
+
 
   <h1>💼 AI-Driven Financial Recovery & Debt Optimization System - Project Analysis</h1>
 
@@ -172,6 +166,3 @@ Database: Supabase (cloud instance)</code></pre>
       distinguishing it from typical financial management tools.
     </p>
 
-
-</body>
-</html>
