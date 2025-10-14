@@ -10,7 +10,6 @@
 
   <p>This is a comprehensive full-stack financial management and AI-powered analytics platform designed to help users manage finances, analyze data, and receive intelligent insights through an <strong>AI Virtual CFO assistant</strong>.</p>
 
-  <div class="section">
     <h2>🏗️ Architecture Overview</h2>
 
     <h3>Frontend (React + TypeScript + Vite)</h3>
@@ -32,7 +31,6 @@
       <li>Data: Pandas, NumPy, Matplotlib, Seaborn</li>
       <li>Database: Supabase (PostgreSQL)</li>
     </ul>
-  </div>
     <h2>🧩 Core Features</h2>
 
     <h3>1. User Authentication & Management</h3>
@@ -115,7 +113,7 @@
       <tr><td>loans</td><td>Loan tracking</td></tr>
       <tr><td>financial_records</td><td>Uploaded CSV data</td></tr>
     </table>
-  </div>
+
 
     <h2>🧠 AI/ML Technologies</h2>
     <ul>
@@ -128,7 +126,6 @@
     </ul>
   </div>
 
-  <div class="section">
     <h2>🔁 Key Workflows</h2>
 
     <h3>Typical User Journey</h3>
@@ -148,7 +145,7 @@
       <li>AI merges data + strategy → Returns insight</li>
       <li>Frontend displays chart + text in chat UI</li>
     </ol>
-  </div>
+
 
     <h2>🔐 Security & Best Practices</h2>
     <ul>
@@ -158,15 +155,15 @@
       <li>Supabase Row-Level Security (RLS)</li>
       <li>Safe LangChain execution with error handling</li>
     </ul>
-  </div>
+ 
 
     <h2>🧑‍💻 Development Setup</h2>
     <pre><code>Frontend: npm run dev (Vite on port 8080)
 Backend: python app.py (Flask on port 5000)
 Database: Supabase (cloud instance)</code></pre>
-  </div>
 
-  <div class="section">
+
+
     <h2>🧾 Summary</h2>
     <p>
       This production-ready SaaS blends traditional CRUD operations with 
@@ -174,7 +171,7 @@ Database: Supabase (cloud instance)</code></pre>
       to deliver intelligent, data-backed strategic advice, 
       distinguishing it from typical financial management tools.
     </p>
-  </div>
+
 
 </body>
 </html>
