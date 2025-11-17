@@ -93,7 +93,7 @@ const Loans = () => {
           start_date: data.start_date,
           end_date: data.end_date,
           monthly_payment: data.monthly_payment,
-          status: data.status,
+          status: data.status as 'active' | 'paid' | 'defaulted',
         }, ...prev]);
       }
       setFormData({

@@ -89,7 +89,7 @@ const Invoices = () => {
           date: data.date,
           due_date: data.due_date,
           amount: data.amount,
-          status: data.status,
+          status: data.status as 'pending' | 'paid' | 'overdue',
         }, ...prev]);
       }
       setFormData({
