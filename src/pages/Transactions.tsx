@@ -86,7 +86,7 @@ const Transactions = () => {
           description: data.description,
           category: data.category,
           amount: data.amount,
-          type: data.type,
+          type: data.type as 'income' | 'expense',
         }, ...prev]);
       }
       setFormData({
